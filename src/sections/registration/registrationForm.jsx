@@ -76,6 +76,7 @@ export default function RegistrationForm() {
     studentgapdescription: '',
     marritalstatus: 2,
     dateofmarriage: '',
+    spousename: '',
     kids: null,
     spousedob: '',
     spouseresume: '',
@@ -100,7 +101,7 @@ export default function RegistrationForm() {
     passportexpirydate: '',
     academicdetails: [{ academicid: null, university: '', yop: '', percentage: '', numofarrears: '' }],
     languagetest: [{ languagetestid: null, speaking: '', reading: '', writing: '', listening: '' }],
-    interestedcourse: [],
+    interestedcourse: '',
     interestedcountry: []
   });
 
@@ -463,7 +464,7 @@ export default function RegistrationForm() {
                     mb: 0.5
                   }}
                 >
-                  First Name (As Per Passport)
+                  First Name {formData.passportstatus === 1 ? '(As Per Passport)' : ''}
                 </InputLabel>
                 <OutlinedInput
                   id="studentfirstname"
@@ -500,7 +501,7 @@ export default function RegistrationForm() {
                     mb: 0.5
                   }}
                 >
-                  Last Name (As Per Passport)
+                  Last Name {formData.passportstatus === 1 ? '(As Per Passport)' : ''}
                 </InputLabel>
                 <OutlinedInput
                   id="studentlastname"
@@ -1021,7 +1022,8 @@ export default function RegistrationForm() {
             </Grid>
 
             {/* Scores Section */}
-            {formData.languagetest[0]?.languagetestid && (
+            {formData.languagetest[0]?.languagetestid && 
+             languageTests.find(test => test.languagetestid === formData.languagetest[0]?.languagetestid)?.languagetestname !== "To Be Taken Later" && (
               <>
                 {['speaking', 'reading', 'writing', 'listening'].map((section) => (
                   <Grid item xs={6} md={3} key={section}>
@@ -1046,34 +1048,27 @@ export default function RegistrationForm() {
                 <InputLabel htmlFor="interested-course" sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
                   Course/Subjects Interested
                 </InputLabel>
-                <Autocomplete
+                <TextField
                   id="interested-course"
-                  multiple
-                  options={courseOptions} // List of course objects from API
-                  getOptionLabel={(option) => option.coursename}
-                  value={courseOptions.filter((course) => formData.interestedcourse.includes(course.courseid))}
-                  onChange={(event, newValue) => handleInterestedCourseChange(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="Select Courses"
-                      fullWidth
-                      sx={{
-                        backgroundColor: '#fff',
-                        transition: 'all 0.3s ease',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#999'
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#333'
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#19D23E',
-                          boxShadow: '0 0 0 2px rgba(25, 210, 62, 0.2)'
-                        }
-                      }}
-                    />
-                  )}
+                  name="interestedcourse"
+                  value={formData.interestedcourse}
+                  onChange={(e) => setFormData({ ...formData, interestedcourse: e.target.value })}
+                  placeholder="Enter your interested courses"
+                  fullWidth
+                  sx={{
+                    backgroundColor: '#fff',
+                    transition: 'all 0.3s ease',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#999'
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#333'
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#19D23E',
+                      boxShadow: '0 0 0 2px rgba(25, 210, 62, 0.2)'
+                    }
+                  }}
                 />
               </Stack>
             </Grid>
@@ -1196,6 +1191,7 @@ export default function RegistrationForm() {
                       ...formData,
                       marritalstatus: value,
                       dateofmarriage: value === 1 ? formData.dateofmarriage : '',
+                      spousename: value === 1 ? formData.spousename : '',
                       kids: value === 1 ? formData.kids : null,
                       spousedob: value === 1 ? formData.spousedob : '',
                       spouseresume: value === 1 ? formData.spouseresume : ''
@@ -1227,6 +1223,45 @@ export default function RegistrationForm() {
                       sx={customFieldStyle}
                     />
                   </LocalizationProvider>
+
+                  {/* Add Spouse Name field */}
+                  <Grid item xs={12} mt={2}>
+                    <Stack spacing={1}>
+                     
+                      <TextField
+                        id="spousename"
+                        name="spousename"
+                        value={formData.spousename || ''}
+                        onChange={(e) => setFormData({ ...formData, spousename: e.target.value })}
+                        placeholder="Enter spouse name"
+                        fullWidth
+                        sx={{
+                          backgroundColor: '#fff',
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#999'
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#333'
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#19D23E',
+                            boxShadow: '0 0 0 2px rgba(25, 210, 62, 0.2)'
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Grid>
+                   <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Spouse D.O.B"
+                      value={formData.spousedob ? dayjs(formData.spousedob) : null}
+                      onChange={(newDate) => setFormData({ ...formData, spousedob: newDate ? newDate.format('YYYY-MM-DD') : '' })}
+                      format="DD/MM/YYYY"
+                      slotProps={{ textField: { fullWidth: true, margin: 'normal' } }}
+                      sx={customFieldStyle}
+                    />
+                  </LocalizationProvider>
+
                   <Grid item xs={12} mt={2}>
                     <Stack spacing={1}>
                       <TextField
@@ -1247,16 +1282,7 @@ export default function RegistrationForm() {
                     </Stack>
                   </Grid>
 
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Spouse D.O.B"
-                      value={formData.spousedob ? dayjs(formData.spousedob) : null}
-                      onChange={(newDate) => setFormData({ ...formData, spousedob: newDate ? newDate.format('YYYY-MM-DD') : '' })}
-                      format="DD/MM/YYYY"
-                      slotProps={{ textField: { fullWidth: true, margin: 'normal' } }}
-                      sx={customFieldStyle}
-                    />
-                  </LocalizationProvider>
+                 
 
                   <SpouseFileUpload onFileUpload={handleFileUpload} />
                 </>

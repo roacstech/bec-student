@@ -9,4 +9,3 @@ const s3awsConfig = new S3Client({
 });
 
 export default s3awsConfig;
-s
