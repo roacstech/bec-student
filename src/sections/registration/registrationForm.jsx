@@ -1124,6 +1124,7 @@ export default function RegistrationForm() {
               </Grid>
             )}
 
+
             {/* Current Status Description - Show only when status is Studying or Others */}
             {formData.currentstatus !== 1 && (
               <Grid item xs={12}>
