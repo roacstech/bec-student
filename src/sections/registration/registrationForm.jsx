@@ -93,8 +93,7 @@ export default function RegistrationForm() {
     visarefusal: null,
     visarefusaldescription: '',
     familyinoverseas: 0,
-    familyinoverseascountry: 0,
-    familyinoverseasrelationship: 0,
+    familyinoverseasdetails: [],
     counselorcomments: '',
     knowaboutoffice: '',
     passportstatus: null,
@@ -102,8 +101,11 @@ export default function RegistrationForm() {
     academicdetails: [{ academicid: null, university: '', yop: '', percentage: '', numofarrears: '' }],
     languagetest: [{ languagetestid: null, speaking: '', reading: '', writing: '', listening: '' }],
     interestedcourse: '',
-    interestedcountry: []
+    interestedcountry: [],
+    previousexperiences: []
   });
+
+  const [showPreviousExperience, setShowPreviousExperience] = useState(false);
 
   const { id } = useParams();
 
@@ -233,6 +235,7 @@ export default function RegistrationForm() {
   };
 
   const addAcademicField = () => {
+
     setFormData((prev) => ({
       ...prev,
       academicdetails: [...prev.academicdetails, { academicid: Date.now(), university: '', yop: '', percentage: '', numofarrears: '' }]
@@ -324,6 +327,60 @@ export default function RegistrationForm() {
       }}
     />
   );
+
+  const addPreviousExperience = () => {
+    setShowPreviousExperience(true);
+    setFormData((prev) => ({
+      ...prev,
+      previousexperiences: [...prev.previousexperiences, { description: '' }]
+    }));
+  };
+
+  const handlePreviousExperienceChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updatedExperiences = [...prev.previousexperiences];
+      updatedExperiences[index] = {
+        ...updatedExperiences[index],
+        [field]: value
+      };
+      return { ...prev, previousexperiences: updatedExperiences };
+    });
+  };
+
+  const deletePreviousExperience = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      previousexperiences: prev.previousexperiences.filter((_, i) => i !== index)
+    }));
+    if (formData.previousexperiences.length === 1) {
+      setShowPreviousExperience(false);
+    }
+  };
+
+  const addFamilyRelationship = () => {
+    setFormData((prev) => ({
+      ...prev,
+      familyinoverseasdetails: [...prev.familyinoverseasdetails, { country: null, relationship: '' }]
+    }));
+  };
+
+  const handleFamilyRelationshipChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updatedDetails = [...prev.familyinoverseasdetails];
+      updatedDetails[index] = {
+        ...updatedDetails[index],
+        [field]: value
+      };
+      return { ...prev, familyinoverseasdetails: updatedDetails };
+    });
+  };
+
+  const deleteFamilyRelationship = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      familyinoverseasdetails: prev.familyinoverseasdetails.filter((_, i) => i !== index)
+    }));
+  };
 
   return (
     <Grid>
@@ -893,8 +950,7 @@ export default function RegistrationForm() {
                 </Button>
               </Grid>
             </Grid>
-
-            {/* Current Status */}
+           
             {/* Current Status */}
             <Grid item xs={12} md={12}>
               <Stack spacing={1}>
@@ -946,6 +1002,7 @@ export default function RegistrationForm() {
                   )}
                 />
               </Stack>
+              
             </Grid>
 
             {/* Current Status Description */}
@@ -978,6 +1035,58 @@ export default function RegistrationForm() {
                 />
               </Stack>
             </Grid>
+
+            {/* Previous Experience */}
+            {showPreviousExperience && (
+                  <Grid item xs={12}>
+                    {formData.previousexperiences.map((experience, index) => (
+                      <Stack spacing={1} key={index} sx={{ mb: 2 }}>
+                        <InputLabel sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
+                          Previous Experience {index + 1}
+                        </InputLabel>
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                          <OutlinedInput
+                            value={experience.description}
+                            onChange={(e) => handlePreviousExperienceChange(index, 'description', e.target.value)}
+                            placeholder="Enter your previous experience"
+                            fullWidth
+                            multiline
+                            rows={3}
+                            sx={customFieldStyle}
+                          />
+                          {formData.previousexperiences.length > 0 && (
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              size="large"
+                              onClick={() => deletePreviousExperience(index)}
+                              sx={{ minWidth: 'auto', px: 1 }}
+                            >
+                              <MinusCircleOutlined fontSize="medium" />
+                            </Button>
+                          )}
+                        </Box>
+                      </Stack>
+                    ))}
+                  </Grid>
+                )}
+
+            {formData.currentstatus === 1 && (
+              <>
+                <Grid item xs={12} mt={2} display="flex" justifyContent="flex-end">
+                  <Button
+                    variant="outlined"
+                    size="medium"
+                    startIcon={<BankOutlined />}
+                    onClick={addPreviousExperience}
+                    sx={{ borderRadius: 2, textTransform: 'none' }}
+                  >
+                    Add Previous Experience
+                  </Button>
+                </Grid>
+               
+              </>
+            )}
 
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight="bold">
@@ -1693,14 +1802,13 @@ export default function RegistrationForm() {
               <RadioGroup
                 row
                 name="familyinoverseas"
-                value={formData?.familyinoverseas} // Store as number
+                value={formData?.familyinoverseas}
                 onChange={(e) => {
                   const value = Number(e.target.value);
                   setFormData({
                     ...formData,
                     familyinoverseas: value,
-                    familyinoverseascountry: value === 2 ? undefined : formData.familyinoverseascountry,
-                    familyinoverseasrelationship: value === 2 ? undefined : formData.familyinoverseasrelationship
+                    familyinoverseasdetails: value === 1 ? [{ country: null, relationship: '' }] : []
                   });
                 }}
               >
@@ -1709,8 +1817,8 @@ export default function RegistrationForm() {
                   control={
                     <Radio
                       sx={{
-                        color: '#4caf50', // Green color for 'Yes'
-                        '&.Mui-checked': { color: '#4caf50' } // Green when selected
+                        color: '#4caf50',
+                        '&.Mui-checked': { color: '#4caf50' }
                       }}
                     />
                   }
@@ -1721,8 +1829,8 @@ export default function RegistrationForm() {
                   control={
                     <Radio
                       sx={{
-                        color: '#f44336', // Red color for 'No'
-                        '&.Mui-checked': { color: '#f44336' } // Red when selected
+                        color: '#f44336',
+                        '&.Mui-checked': { color: '#f44336' }
                       }}
                     />
                   }
@@ -1732,57 +1840,79 @@ export default function RegistrationForm() {
 
               {formData?.familyinoverseas === 1 && (
                 <>
-                  <InputLabel sx={{ mb: 2, mt: 2 }}>Which Country & Relationship?</InputLabel>
+                  {formData.familyinoverseasdetails.map((detail, index) => (
+                    <Box key={index} sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mb: 2 }}>
+                      <Autocomplete
+                        options={allcountries}
+                        getOptionLabel={(option) => option.country_name}
+                        renderInput={(params) => <TextField {...params} label="Select Country" variant="outlined" />}
+                        value={allcountries.find((c) => c.id === detail.country) || null}
+                        onChange={(event, newValue) => handleFamilyRelationshipChange(index, 'country', newValue ? newValue.id : null)}
+                        sx={{
+                          flex: 1,
+                          '& .MuiInputBase-root': {
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#999'
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#333'
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#4CAF50',
+                              boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
+                            }
+                          }
+                        }}
+                      />
 
-                  {/* Country Autocomplete Dropdown */}
-                  <Autocomplete
-                    options={allcountries}
-                    getOptionLabel={(option) => option.country_name} // Display country names
-                    renderInput={(params) => <TextField {...params} label="Select Country" variant="outlined" fullWidth />}
-                    value={allcountries.find((c) => c.id === formData?.familyinoverseascountry) || null}
-                    onChange={(event, newValue) =>
-                      setFormData((prev) => ({ ...prev, familyinoverseascountry: newValue ? newValue.countryid : null }))
-                    }
-                    sx={{
-                      mb: 2,
-                      '& .MuiInputBase-root': {
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#999'
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#333'
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#4CAF50',
-                          boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
-                        }
-                      }
-                    }}
-                  />
+                      <Autocomplete
+                        options={relationships}
+                        getOptionLabel={(option) => option}
+                        renderInput={(params) => <TextField {...params} label="Select Relationship" variant="outlined" />}
+                        value={detail.relationship || ''}
+                        onChange={(event, newValue) => handleFamilyRelationshipChange(index, 'relationship', newValue)}
+                        sx={{
+                          flex: 1,
+                          '& .MuiInputBase-root': {
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#999'
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#333'
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#4CAF50',
+                              boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
+                            }
+                          }
+                        }}
+                      />
 
-                  {/* Relationship Autocomplete Dropdown */}
-                  <Autocomplete
-                    options={relationships} // Ensure this is an array of strings
-                    getOptionLabel={(option) => option} // This will display each relationship string
-                    renderInput={(params) => <TextField {...params} label="Select Relationship" variant="outlined" fullWidth />}
-                    value={formData?.familyinoverseasrelationship || ''} // Ensures the value is a string (empty string if not set)
-                    onChange={(event, newValue) => setFormData((prev) => ({ ...prev, familyinoverseasrelationship: newValue }))} // Updates string value
-                    sx={{
-                      mb: 2,
-                      '& .MuiInputBase-root': {
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#999'
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#333'
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#4CAF50',
-                          boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
-                        }
-                      }
-                    }}
-                  />
+                      {index > 0 && (
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="large"
+                          onClick={() => deleteFamilyRelationship(index)}
+                          sx={{ minWidth: 'auto', px: 1 }}
+                        >
+                          <MinusCircleOutlined fontSize="medium" />
+                        </Button>
+                      )}
+                    </Box>
+                  ))}
+
+                  <Grid item xs={12} mt={2} display="flex" justifyContent="flex-end">
+                    <Button
+                      variant="outlined"
+                      size="medium"
+                      startIcon={<BankOutlined />}
+                      onClick={addFamilyRelationship}
+                      sx={{ borderRadius: 2, textTransform: 'none' }}
+                    >
+                      Add Family Relationship
+                    </Button>
+                  </Grid>
                 </>
               )}
             </Grid>
