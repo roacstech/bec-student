@@ -72,6 +72,12 @@ export default function RegistrationForm() {
     address: '',
     currentstatus: null,
     currentstatusdescription: '',
+    companyname: '',
+    jobtitle: '',
+    noofyearsexperience: '',
+    startdate: '',
+    enddate: '',
+    description: '',
     studentgap: null,
     studentgapdescription: '',
     marritalstatus: 2,
@@ -142,10 +148,6 @@ export default function RegistrationForm() {
   });
 
   const allcountries = allcountry || [];
-  console.log('allcountries', allcountries);
-  // const countries =  ['Australia', 'Canada', 'Malaysia', 'New Zealand', 'Singapore', 'UK', 'USA'];
-
-  // console.log('countries from edit', countries); // End APi Fetchings
 
   const relationships = ['Father', 'Mother', 'Brother', 'Sister', 'Uncle', 'Aunt', 'Cousin'];
 
@@ -235,7 +237,6 @@ export default function RegistrationForm() {
   };
 
   const addAcademicField = () => {
-
     setFormData((prev) => ({
       ...prev,
       academicdetails: [...prev.academicdetails, { academicid: Date.now(), university: '', yop: '', percentage: '', numofarrears: '' }]
@@ -278,7 +279,7 @@ export default function RegistrationForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
+    console.log('formData', formData);
     // Proceed with the registration process if all required fields are filled
     registerStudentMutation.mutate(formData);
   };
@@ -329,10 +330,19 @@ export default function RegistrationForm() {
   );
 
   const addPreviousExperience = () => {
-    setShowPreviousExperience(true);
     setFormData((prev) => ({
       ...prev,
-      previousexperiences: [...prev.previousexperiences, { description: '' }]
+      previousexperiences: [
+        ...prev.previousexperiences,
+        {
+          companyname: '',
+          jobtitle: '',
+          noofyearsexperience: '',
+          startdate: '',
+          enddate: '',
+          description: ''
+        }
+      ]
     }));
   };
 
@@ -417,7 +427,7 @@ export default function RegistrationForm() {
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                       borderColor: '#19D23E', // On focus (greenish tone)
-                      boxShadow: '0 0 0 2px rgba(25, 210, 62, 0.2)'
+                      boxShadow: '0 0 0 2px rgba(25, 210, 62, 0.2)' // Greenish shadow
                     }
                   }}
                 />
@@ -950,7 +960,7 @@ export default function RegistrationForm() {
                 </Button>
               </Grid>
             </Grid>
-           
+
             {/* Current Status */}
             <Grid item xs={12} md={12}>
               <Stack spacing={1}>
@@ -976,7 +986,14 @@ export default function RegistrationForm() {
                   onChange={(event, newValue) =>
                     setFormData({
                       ...formData,
-                      currentstatus: newValue ? newValue.value : 0
+                      currentstatus: newValue ? newValue.value : 0,
+                      // Reset work-related fields when status changes
+                      companyname: '',
+                      jobtitle: '',
+                      noofyearsexperience: '',
+                      startdate: '',
+                      enddate: '',
+                      description: ''
                     })
                   }
                   renderInput={(params) => (
@@ -984,95 +1001,237 @@ export default function RegistrationForm() {
                       {...params}
                       placeholder="Select your status"
                       fullWidth
-                      sx={{
-                        backgroundColor: '#fff',
-                        transition: 'all 0.3s ease',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#999' // Default border color
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#333' // On hover border color
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#19D23E', // Greenish border color on focus
-                          boxShadow: '0 0 0 2px rgba(25, 210, 62, 0.2)' // Subtle green shadow on focus
-                        }
-                      }}
+                      sx={customFieldStyle}
                     />
                   )}
                 />
               </Stack>
-              
             </Grid>
 
-            {/* Current Status Description */}
-            <Grid item xs={12}>
-              <Stack spacing={1}>
-                <InputLabel htmlFor="currentstatusdescription" sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
-                  Current Status Description
-                </InputLabel>
-                <OutlinedInput
-                  id="currentstatusdescription"
-                  name="currentstatusdescription"
-                  value={formData.currentstatusdescription || ''}
-                  onChange={handleChange}
-                  placeholder="Enter your current status description"
-                  fullWidth
-                  sx={{
-                    backgroundColor: '#fff',
-                    transition: 'all 0.3s ease',
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#999' // Default border color
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#333' // On hover border color
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#19D23E', // Greenish border color on focus
-                      boxShadow: '0 0 0 2px rgba(25, 210, 62, 0.2)' // Subtle green shadow on focus
-                    }
-                  }}
-                />
-              </Stack>
-            </Grid>
+            {/* Work Details - Show only when status is Working */}
+            {formData.currentstatus === 1 && (
+              <Grid container spacing={2} alignItems="flex-end" sx={{ mt: 2 }}>
+                <Grid item xs={2}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="companyname" sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
+                      Company Name
+                    </InputLabel>
+                    <OutlinedInput
+                      id="companyname"
+                      name="companyname"
+                      value={formData.companyname || ''}
+                      onChange={handleChange}
+                      placeholder="Enter company name"
+                      fullWidth
+                      sx={customFieldStyle}
+                    />
+                  </Stack>
+                </Grid>
+
+                <Grid item xs={2}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="jobtitle" sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
+                      Job Title
+                    </InputLabel>
+                    <OutlinedInput
+                      id="jobtitle"
+                      name="jobtitle"
+                      value={formData.jobtitle || ''}
+                      onChange={handleChange}
+                      placeholder="Enter job title"
+                      fullWidth
+                      sx={customFieldStyle}
+                    />
+                  </Stack>
+                </Grid>
+
+                <Grid item xs={2}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="noofyearsexperience" sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
+                      Years Exp.
+                    </InputLabel>
+                    <OutlinedInput
+                      id="noofyearsexperience"
+                      name="noofyearsexperience"
+                      type="number"
+                      value={formData.noofyearsexperience || ''}
+                      onChange={handleChange}
+                      placeholder="Years"
+                      fullWidth
+                      sx={customFieldStyle}
+                    />
+                  </Stack>
+                </Grid>
+
+                <Grid item xs={2}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="startdate" sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
+                      Start Date
+                    </InputLabel>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        value={formData.startdate ? dayjs(formData.startdate) : null}
+                        onChange={(newDate) => setFormData({ ...formData, startdate: newDate ? newDate.format('YYYY-MM-DD') : '' })}
+                        format="DD/MM/YYYY"
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            sx: customFieldStyle
+                          }
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </Stack>
+                </Grid>
+
+                <Grid item xs={2}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="enddate" sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
+                      End Date
+                    </InputLabel>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        value={formData.enddate ? dayjs(formData.enddate) : null}
+                        onChange={(newDate) => setFormData({ ...formData, enddate: newDate ? newDate.format('YYYY-MM-DD') : '' })}
+                        format="DD/MM/YYYY"
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            sx: customFieldStyle
+                          }
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </Stack>
+                </Grid>
+
+                <Grid item xs={2}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="description" sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
+                      Description
+                    </InputLabel>
+                    <OutlinedInput
+                      id="description"
+                      name="description"
+                      value={formData.description || ''}
+                      onChange={handleChange}
+                      placeholder="Enter description"
+                      fullWidth
+                      sx={customFieldStyle}
+                    />
+                  </Stack>
+                </Grid>
+              </Grid>
+            )}
+
+            {/* Current Status Description - Show only when status is Studying or Others */}
+            {formData.currentstatus !== 1 && (
+              <Grid item xs={12}>
+                <Stack spacing={1}>
+                  <InputLabel htmlFor="currentstatusdescription" sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
+                    Current Status Description
+                  </InputLabel>
+                  <OutlinedInput
+                    id="currentstatusdescription"
+                    name="currentstatusdescription"
+                    value={formData.currentstatusdescription || ''}
+                    onChange={handleChange}
+                    placeholder="Enter your current status description"
+                    fullWidth
+                    sx={customFieldStyle}
+                  />
+                </Stack>
+              </Grid>
+            )}
 
             {/* Previous Experience */}
-            {showPreviousExperience && (
-                  <Grid item xs={12}>
-                    {formData.previousexperiences.map((experience, index) => (
-                      <Stack spacing={1} key={index} sx={{ mb: 2 }}>
-                        <InputLabel sx={{ fontWeight: 500, fontSize: '0.95rem', color: '#444' }}>
-                          Previous Experience {index + 1}
-                        </InputLabel>
-                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-                          <OutlinedInput
-                            value={experience.description}
-                            onChange={(e) => handlePreviousExperienceChange(index, 'description', e.target.value)}
-                            placeholder="Enter your previous experience"
-                            fullWidth
-                            multiline
-                            rows={3}
-                            sx={customFieldStyle}
-                          />
-                          {formData.previousexperiences.length > 0 && (
-                            <Button
-                              variant="outlined"
-                              color="error"
-                              size="large"
-                              onClick={() => deletePreviousExperience(index)}
-                              sx={{ minWidth: 'auto', px: 1 }}
-                            >
-                              <MinusCircleOutlined fontSize="medium" />
-                            </Button>
-                          )}
-                        </Box>
-                      </Stack>
-                    ))}
-                  </Grid>
-                )}
-
             {formData.currentstatus === 1 && (
               <>
+                {formData.previousexperiences.map((experience, index) => (
+                  <Grid container spacing={2} key={index} alignItems="flex-end" sx={{ mt: 2 }}>
+                    <Grid item xs={2}>
+                      <OutlinedInput
+                        value={experience.companyname || ''}
+                        onChange={(e) => handlePreviousExperienceChange(index, 'companyname', e.target.value)}
+                        placeholder="Company Name"
+                        fullWidth
+                        sx={customFieldStyle}
+                      />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <OutlinedInput
+                        value={experience.jobtitle || ''}
+                        onChange={(e) => handlePreviousExperienceChange(index, 'jobtitle', e.target.value)}
+                        placeholder="Job Title"
+                        fullWidth
+                        sx={customFieldStyle}
+                      />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <OutlinedInput
+                        type="number"
+                        value={experience.noofyearsexperience || ''}
+                        onChange={(e) => handlePreviousExperienceChange(index, 'noofyearsexperience', e.target.value)}
+                        placeholder="Years"
+                        fullWidth
+                        sx={customFieldStyle}
+                      />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          value={experience.startdate ? dayjs(experience.startdate) : null}
+                          onChange={(newDate) => handlePreviousExperienceChange(index, 'startdate', newDate ? newDate.format('YYYY-MM-DD') : '')}
+                          format="DD/MM/YYYY"
+                          slotProps={{
+                            textField: {
+                              fullWidth: true,
+                              sx: customFieldStyle,
+                              placeholder: 'Start Date'
+                            }
+                          }}
+                        />
+                      </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          value={experience.enddate ? dayjs(experience.enddate) : null}
+                          onChange={(newDate) => handlePreviousExperienceChange(index, 'enddate', newDate ? newDate.format('YYYY-MM-DD') : '')}
+                          format="DD/MM/YYYY"
+                          slotProps={{
+                            textField: {
+                              fullWidth: true,
+                              sx: customFieldStyle,
+                              placeholder: 'End Date'
+                            }
+                          }}
+                        />
+                      </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <OutlinedInput
+                        value={experience.description || ''}
+                        onChange={(e) => handlePreviousExperienceChange(index, 'description', e.target.value)}
+                        placeholder="Description"
+                        fullWidth
+                        sx={customFieldStyle}
+                      />
+                    </Grid>
+                    <Grid item xs={1}>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="large"
+                        onClick={() => deletePreviousExperience(index)}
+                        sx={{ minWidth: 'auto', px: 1 }}
+                      >
+                        <MinusCircleOutlined fontSize="medium" />
+                      </Button>
+                    </Grid>
+                  </Grid>
+                ))}
+
                 <Grid item xs={12} mt={2} display="flex" justifyContent="flex-end">
                   <Button
                     variant="outlined"
@@ -1084,7 +1243,6 @@ export default function RegistrationForm() {
                     Add Previous Experience
                   </Button>
                 </Grid>
-               
               </>
             )}
 
@@ -1131,25 +1289,26 @@ export default function RegistrationForm() {
             </Grid>
 
             {/* Scores Section */}
-            {formData.languagetest[0]?.languagetestid && 
-             languageTests.find(test => test.languagetestid === formData.languagetest[0]?.languagetestid)?.languagetestname !== "To Be Taken Later" && (
-              <>
-                {['speaking', 'reading', 'writing', 'listening'].map((section) => (
-                  <Grid item xs={6} md={3} key={section}>
-                    <Stack spacing={1}>
-                      <InputLabel>{section.charAt(0).toUpperCase() + section.slice(1)} Score</InputLabel>
-                      <OutlinedInput
-                        name={section}
-                        value={formData.languagetest[0]?.[section] || ''}
-                        onChange={(e) => handleScoreChange(e, section)}
-                        placeholder={`Enter ${section} score`}
-                        fullWidth
-                      />
-                    </Stack>
-                  </Grid>
-                ))}
-              </>
-            )}
+            {formData.languagetest[0]?.languagetestid &&
+              languageTests.find((test) => test.languagetestid === formData.languagetest[0]?.languagetestid)?.languagetestname !==
+                'To Be Taken Later' && (
+                <>
+                  {['speaking', 'reading', 'writing', 'listening'].map((section) => (
+                    <Grid item xs={6} md={3} key={section}>
+                      <Stack spacing={1}>
+                        <InputLabel>{section.charAt(0).toUpperCase() + section.slice(1)} Score</InputLabel>
+                        <OutlinedInput
+                          name={section}
+                          value={formData.languagetest[0]?.[section] || ''}
+                          onChange={(e) => handleScoreChange(e, section)}
+                          placeholder={`Enter ${section} score`}
+                          fullWidth
+                        />
+                      </Stack>
+                    </Grid>
+                  ))}
+                </>
+              )}
 
             {/* Course/Subjects Interested */}
             <Grid item xs={12}>
@@ -1244,29 +1403,6 @@ export default function RegistrationForm() {
                 Country Interested In:
               </Typography>
 
-              {/* <Autocomplete
-                    options={countries} // Ensure this is an array of strings
-                    getOptionLabel={(option) => option} // This will display each relationship string
-                    renderInput={(params) => <TextField {...params} label="Select Countries" variant="outlined" fullWidth />}
-                    value={formData?.familyinoverseasrelationship || ''} // Ensures the value is a string (empty string if not set)
-                    onChange={(event, newValue) => setFormData((prev) => ({ ...prev, familyinoverseasrelationship: newValue }))} // Updates string value
-                    sx={{
-                      mb: 2,
-                      '& .MuiInputBase-root': {
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#999'
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#333'
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#4CAF50',
-                          boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.2)'
-                        }
-                      }
-                    }}
-                  /> */}
-
               <Autocomplete
                 multiple
                 options={countries}
@@ -1336,7 +1472,6 @@ export default function RegistrationForm() {
                   {/* Add Spouse Name field */}
                   <Grid item xs={12} mt={2}>
                     <Stack spacing={1}>
-                     
                       <TextField
                         id="spousename"
                         name="spousename"
@@ -1360,7 +1495,7 @@ export default function RegistrationForm() {
                       />
                     </Stack>
                   </Grid>
-                   <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       label="Spouse D.O.B"
                       value={formData.spousedob ? dayjs(formData.spousedob) : null}
@@ -1390,8 +1525,6 @@ export default function RegistrationForm() {
                       />
                     </Stack>
                   </Grid>
-
-                 
 
                   <SpouseFileUpload onFileUpload={handleFileUpload} />
                 </>
